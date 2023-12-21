@@ -1,0 +1,13 @@
+{
+  "name": "desafio-fundamentos-tasks",
+  "version": "1.0.0",
+  "description": "Desafio Fundamentos Node.js - Tasks API - Ignite 2023",
+  "main": "index.js",
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch src/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
