@@ -1,4 +1,4 @@
-import fs from 'node:fs'
+import fs from 'node:fs/promises'
 
 const databasePath = new URL('../db.json', import.meta.url)
 
@@ -10,8 +10,9 @@ export class Database {
       .then(data => {
         this.#database = JSON.parse(data)
       })
-      .catch(() => this.#persist())
-
+      .catch(() => {
+        this.#persist()
+      })
   }
 
   #persist() {
@@ -19,25 +20,23 @@ export class Database {
   }
 
   select(table, search) {
-    let data = this.#database[table] ?? []
+    let data  = this.#database[table] ?? []
 
-    if (search) {
-      data = data
-        .filter(row => {
-          return Object.entries(search).some(([key, value]) => {
-              return row[key].includes(value)
-          })
-        })
-    }
+    // if (search) {
+    //   data = data.filter(row => {
+    //     return Object.entries(search).some(([key, value]) => {
+    //       return row[key].includes(value)
+    //     })
+    //   })
+    // }
 
     return data
   }
 
   insert(table, data) {
-    Array
-      .isArray(this.#database[table])
-      ? this.#database[table].push(data)
-      : this.#database[table] = [data]
+    Array.isArray(this.#database[table])
+    ? this.#database[table].push(data)
+    : this.#database[table] = [data]
 
     this.#persist()
 
@@ -45,19 +44,37 @@ export class Database {
   }
 
   update(table, id, data) {
-    const rowIndex = this.#database[table].findIndex(row => row.id === id)
+    const index = this.#database[table].findIndex(row => row.id === id)
 
-    if (rowIndex > -1) {
-      this.#database[table][rowIndex] = { id, ...data }
+    if (index > -1) {
+      const task = this.#database[table][index]
+
+      Object.assign(task, data)
+      task.updated_at = new Date()
+      
+      this.#database[table][index] = task
       this.#persist()
     }
   }
 
   delete(table, id) {
-    const rowIndex = this.#database[table].findIndex(row => row.id === id)
+    const index = this.#database[table].findIndex(row => row.id === id)
+    
+    if (index > -1) {
+      this.#database[table].splice(index, 1)
+      this.#persist()
+    }
+  }
 
-    if (rowIndex > -1) {
-      this.#database[table].split(rowIndex, 1)
+  complete(table, id) {
+    const index = this.#database[table].findIndex(row => row,id === id)
+
+    if (index > -1) {
+      const task = this.#database[table][index]
+
+      task.completed_at = new Date()
+
+      this.#database[table][index] = task
       this.#persist()
     }
   }
