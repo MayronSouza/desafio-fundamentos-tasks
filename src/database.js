@@ -22,13 +22,15 @@ export class Database {
   select(table, search) {
     let data  = this.#database[table] ?? []
 
-    // if (search) {
-    //   data = data.filter(row => {
-    //     return Object.entries(search).some(([key, value]) => {
-    //       return row[key].includes(value)
-    //     })
-    //   })
-    // }
+    if (search) {
+      data = data.filter(row => {
+        return Object.entries(search).some(([key, value]) => {
+          if (!value) return true
+          
+          return row[key].includes(value)
+        })
+      })
+    }
 
     return data
   }
@@ -62,19 +64,6 @@ export class Database {
     
     if (index > -1) {
       this.#database[table].splice(index, 1)
-      this.#persist()
-    }
-  }
-
-  complete(table, id) {
-    const index = this.#database[table].findIndex(row => row,id === id)
-
-    if (index > -1) {
-      const task = this.#database[table][index]
-
-      task.completed_at = new Date()
-
-      this.#database[table][index] = task
       this.#persist()
     }
   }
